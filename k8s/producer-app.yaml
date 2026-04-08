@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: producer-service
+  namespace: micro-app
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: producer-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer-app
+  namespace: micro-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer-app
+  template:
+    metadata:
+      labels:
+        app: producer-app
+    spec:
+      containers:
+      - name: producer-app
+        image: microservices-app-producer_service
+        imagePullPolicy: Never
+        args:
+          - "--spring.data.mongodb.uri=mongodb://mongodb:27017/producer_db"
+          - "--spring.rabbitmq.host=rabbitmq"
+        ports:
+          - containerPort: 8080
